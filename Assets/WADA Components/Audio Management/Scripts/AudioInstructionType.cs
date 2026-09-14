@@ -1,0 +1,40 @@
+﻿namespace Wada
+{
+    public enum AudioInstructionType
+    {
+        None,
+        BookOpenA,
+        BookOpenB,
+        WorkshopOpen,
+        Ending,
+        CollectedAllAnimals,
+        WelcomeInParadise,
+        NavigateInParadise,
+        FollowYourGuide,
+        WhyDontYouExplore,
+        InfoOnAnimals,
+        EatToStayAlive,
+        WelcomeInWorkshop,
+        WorkshopIntro,
+        WorkshopIntroPickup,
+        WorkshopIntroPickedUp,
+        WorkshopIntroTakeApart,
+        WorkshopIntroMakeNewAnimal,
+        BookClose,
+        WorkshopReleaseAnimal,
+        NudgeGoOnTouchIt,
+        KeepOrSetFree,
+        NudgeVegetarian,
+        NudgeEatSomething,
+        FirstTouch,
+        FirstGrab,
+        FirstTouchWellDone,
+        HowToEat,
+        WorkshopExit,
+        NotRevivable,
+        NotForSave,
+        NudgeBackpack,
+        NudgePlayInWorkshop,
+        BagFull
+    }
+}

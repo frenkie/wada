@@ -1,0 +1,29 @@
+﻿namespace Wada
+{
+    public enum BackgroundMusicType
+    {
+        None,
+        IntroA,
+        IntroB,
+        BeginLow,
+        BeginHigh,
+        Book,
+        Cave,
+        Ending,
+        EndLow,
+        EndHigh,
+        MiddleLow,
+        MiddleHigh,
+        Revival,
+        WindLow,
+        WindMid,
+        Workshop,
+        MusicalScore,
+        RandomScore,
+        SurfaceStart,
+        AfterFirstAnimal,
+        CloserToEnd,
+        MiddleLowAmbi,
+        OuterWind
+    }
+}
