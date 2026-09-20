@@ -11,5 +11,6 @@ namespace Wada
         public string LocationID;
         public string Description;
         public Sprite Image;
+        public Sprite Image_NL;
     }
 }

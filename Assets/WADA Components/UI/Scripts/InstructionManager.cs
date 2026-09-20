@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Wada
@@ -15,6 +16,7 @@ namespace Wada
         static InstructionManager instance;
 
         public AudioInstructions AudioInstructions;
+        public AudioInstructions AudioInstructions_NL;
         public int EndInstructionWithSecondsLeft = 20;
         public Exposure ExposureFader;
 
@@ -30,6 +32,8 @@ namespace Wada
         bool playedFinalInstruction;
 
         bool specialMode;
+        
+        AudioInstructions audioInstructionsForActiveLanguage;
 
         void Awake()
         {
@@ -43,9 +47,9 @@ namespace Wada
 
         public void CancelInstruction(AudioInstructionType type)
         {
-            if ( AudioInstructions.ContainsKey( type ) )
+            if ( audioInstructionsForActiveLanguage.ContainsKey( type ) )
             {
-                AbstractInstruction instruction = AudioInstructions[type];
+                AbstractInstruction instruction = audioInstructionsForActiveLanguage[type];
 
                 if ( IsInSpecialMode() )
                 {
@@ -202,26 +206,26 @@ namespace Wada
 
         public void ForceNextPlay(AudioInstructionType type)
         {
-            if ( AudioInstructions.ContainsKey( type ) )
+            if ( audioInstructionsForActiveLanguage.ContainsKey( type ) )
             {
                 if ( instructionQueue.Count > 0 && instructionQueue[0] == currentInstruction )
                 {
-                    instructionQueue.Insert( 1, AudioInstructions[type] ); // could be an Add in the end, but hey
+                    instructionQueue.Insert( 1, audioInstructionsForActiveLanguage[type] ); // could be an Add in the end, but hey
                 }
                 else if ( instructionQueue.Count > 0 )
                 {
-                    instructionQueue.Prepend( AudioInstructions[type] );
+                    instructionQueue.Prepend( audioInstructionsForActiveLanguage[type] );
                 }
                 else
                 {
-                    instructionQueue.Add( AudioInstructions[type] ); // could be an Add in the end, but hey
+                    instructionQueue.Add( audioInstructionsForActiveLanguage[type] ); // could be an Add in the end, but hey
                 }
             }
         }
 
         public void ForceNextPlayNow(AudioInstructionType type)
         {
-            if ( AudioInstructions.ContainsKey( type ) )
+            if ( audioInstructionsForActiveLanguage.ContainsKey( type ) )
             {
                 ForceNextPlay( type );
                 if ( currentInstruction != null )
@@ -233,7 +237,7 @@ namespace Wada
 
         public void ForcePlay(AudioInstructionType type, bool isSpecial = false)
         {
-            if ( AudioInstructions.ContainsKey( type ) )
+            if ( audioInstructionsForActiveLanguage.ContainsKey( type ) )
             {
                 AbstractInstruction toCancel = null;
 
@@ -245,7 +249,7 @@ namespace Wada
                     }
 
                     specialInstructionQueue = new List<AbstractInstruction>();
-                    currentSpecialInstruction = AudioInstructions[type];
+                    currentSpecialInstruction = audioInstructionsForActiveLanguage[type];
                     currentSpecialInstruction.Go();
                 }
                 else
@@ -256,7 +260,7 @@ namespace Wada
                     }
 
                     instructionQueue = new List<AbstractInstruction>();
-                    currentInstruction = AudioInstructions[type];
+                    currentInstruction = audioInstructionsForActiveLanguage[type];
                     currentInstruction.Go();
                 }
 
@@ -307,7 +311,7 @@ namespace Wada
 
         public AudioInstructionType GetAudioInstructionType(AbstractInstruction instruction)
         {
-            foreach ( KeyValuePair<AudioInstructionType, AbstractInstruction> pair in AudioInstructions )
+            foreach ( KeyValuePair<AudioInstructionType, AbstractInstruction> pair in audioInstructionsForActiveLanguage )
             {
                 if ( pair.Value == instruction )
                 {
@@ -325,15 +329,15 @@ namespace Wada
 
         public bool IsScheduled(AudioInstructionType type, bool isSpecial = false)
         {
-            if ( AudioInstructions.ContainsKey( type ) )
+            if ( audioInstructionsForActiveLanguage.ContainsKey( type ) )
             {
                 if ( isSpecial )
                 {
-                    return specialInstructionQueue.Contains( AudioInstructions[type] );
+                    return specialInstructionQueue.Contains( audioInstructionsForActiveLanguage[type] );
                 }
                 else
                 {
-                    return instructionQueue.Contains( AudioInstructions[type] );
+                    return instructionQueue.Contains( audioInstructionsForActiveLanguage[type] );
                 }
             }
 
@@ -353,9 +357,15 @@ namespace Wada
         public void OnCheckForTimedScoreChange(float progress)
         {
             float secondsLeftInGame = Clock.GetInstance().GetCurrentTimeLeft();
+            float endInstructionWithSecondsLeft = EndInstructionWithSecondsLeft;
+            switch( GameEngine.GetInstance().ActiveLanguage )
+            {
+                case Languages.NL:
+                    endInstructionWithSecondsLeft += 4;
+                    break;
+            }
 
-
-            if ( !playedFinalInstruction && secondsLeftInGame < EndInstructionWithSecondsLeft )
+            if ( !playedFinalInstruction && secondsLeftInGame < endInstructionWithSecondsLeft )
             {
                 playedFinalInstruction = true;
                 ForcePlay( AudioInstructionType.Ending, specialMode ); // no matter the mode
@@ -434,19 +444,19 @@ namespace Wada
 
         public void Play(AudioInstructionType type, bool isSpecial = false)
         {
-            if ( AudioInstructions.ContainsKey( type ) )
+            if ( audioInstructionsForActiveLanguage.ContainsKey( type ) )
             {
                 if ( isSpecial )
                 {
                     Debug.Log( "specialInstructionQueue " + specialInstructionQueue.Count );
                     Debug.Log( "can parse " + parseSpecialQueue );
-                    specialInstructionQueue.Add( AudioInstructions[type] );
+                    specialInstructionQueue.Add( audioInstructionsForActiveLanguage[type] );
                 }
                 else
                 {
                     Debug.Log( "instructionQueue " + instructionQueue.Count );
                     Debug.Log( "can parse " + parseNormalQueue );
-                    instructionQueue.Add( AudioInstructions[type] );
+                    instructionQueue.Add( audioInstructionsForActiveLanguage[type] );
                 }
             }
             else
@@ -457,13 +467,13 @@ namespace Wada
 
         public bool PlayIfSilent(AudioInstructionType type, bool isSpecial = false)
         {
-            if ( AudioInstructions.ContainsKey( type ) )
+            if ( audioInstructionsForActiveLanguage.ContainsKey( type ) )
             {
                 if ( isSpecial )
                 {
                     if ( specialInstructionQueue.Count == 0 )
                     {
-                        specialInstructionQueue.Add( AudioInstructions[type] );
+                        specialInstructionQueue.Add( audioInstructionsForActiveLanguage[type] );
                         return true;
                     }
                 }
@@ -471,7 +481,7 @@ namespace Wada
                 {
                     if ( instructionQueue.Count == 0 )
                     {
-                        instructionQueue.Add( AudioInstructions[type] );
+                        instructionQueue.Add( audioInstructionsForActiveLanguage[type] );
                         return true;
                     }
                 }
@@ -500,8 +510,24 @@ namespace Wada
             }
         }
 
+        void OnLanguageSwitch(Languages language)
+        {
+            switch (language)
+            {
+                case Languages.EN:
+                    audioInstructionsForActiveLanguage = AudioInstructions;
+                    break;
+                    
+                case Languages.NL:
+                    audioInstructionsForActiveLanguage = AudioInstructions_NL;
+                    break;
+            }
+        }
+
         void Start()
         {
+            GameEngine.OnLanguageSwitch += OnLanguageSwitch;
+            OnLanguageSwitch(GameEngine.GetInstance().ActiveLanguage);
             AbstractInstruction.OnFinished += OnInstructionFinished;
             Clock.OnProgress += OnCheckForTimedScoreChange;
         }

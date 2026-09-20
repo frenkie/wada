@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using NaughtyAttributes;
 using UnityEngine;
 
 
@@ -18,6 +20,8 @@ namespace Wada
     public class WadaBook : MonoBehaviour
     {
         static WadaBook instance;
+
+        public List<Texture2D> Textures_NL;
 
         public float MovementStrength = .02f;
         public float MovementTime = 6;
@@ -118,6 +122,7 @@ namespace Wada
             GameEngine.GetInstance().ToggleBookGestureDetection( true );
         }
 
+        [Button]
         public void NextPage()
         {
             if ( shown )
@@ -162,6 +167,7 @@ namespace Wada
             InstructionManager.GetInstance().Play( AudioInstructionType.InfoOnAnimals, true );
         }
 
+        [Button]
         public void PreviousPage()
         {
             if ( shown )
@@ -185,9 +191,65 @@ namespace Wada
             }
         }
 
+        void PrepareLanguage()
+        {
+            /*
+             * Replace textures with the ones for the active language if anything else but EN
+             */
+            Languages lang = GameEngine.GetInstance().ActiveLanguage;
+            if ( lang != Languages.EN )
+            {
+                if ( lang != Languages.NL )
+                {
+                    return;
+                }
+                List<Texture2D> textures = Textures_NL;
+
+                for (int i=0; i<6; i++)
+                {
+                    Renderer renderer = Book.pages[i].obj.GetComponent<Renderer>();
+                    Material[] materials = renderer.materials;
+
+                    int textureIdx1 = -1;
+                    int textureIdx2 = -1;
+                    switch (i)
+                    {
+                        case 0:
+                        case 1:    
+                        case 2:    
+                        case 3:    
+                        case 4:    
+                            textureIdx1 = i * 2;
+                            textureIdx2 = textureIdx1 + 1;
+                            break;
+                        
+                        case 5:
+                            textureIdx1 = i * 2;
+                            break;
+                    }
+
+                    if (textureIdx1 != -1)
+                    {
+                        materials[0].SetTexture("_Page", textures[textureIdx1]);
+                    }                    
+                    if (textureIdx2 != -1)
+                    {
+                        materials[1].SetTexture("_Page", textures[textureIdx2]);
+                    }
+                    
+                }
+            }
+        }
+
+        [Button]
         public void Show()
         {
             shown = true;
+            if (firstShow)
+            {
+                PrepareLanguage();
+            }
+
 
             Gesture.gameObject.SetActive( false );
             GameEngine.GetInstance().ToggleWorkshopGestureDetection( false );
@@ -257,6 +319,7 @@ namespace Wada
         void Start()
         {
             shown = false;
+ 
             Container.SetActive( false );
 
             foreach ( GameObject detector in GestureDetectors )
@@ -285,28 +348,4 @@ namespace Wada
             }
         }
     }
-
-
-#if UNITY_EDITOR
-    [CustomEditor( typeof(WadaBook) )]
-    public class WadaBookEditor : Editor
-    {
-        public override void OnInspectorGUI()
-        {
-            WadaBook myTarget = (WadaBook)target;
-
-            DrawDefaultInspector();
-
-            if ( GUILayout.Button( "Previous Page" ) )
-            {
-                myTarget.PreviousPage();
-            }
-
-            if ( GUILayout.Button( "Next Page" ) )
-            {
-                myTarget.NextPage();
-            }
-        }
-    }
-#endif
 }

@@ -59,7 +59,17 @@ namespace Wada
         public void ParseData(InfoPlaqueData to)
         {
             data = to;
-            ImageField.sprite = data.Image;
+            switch ( GameEngine.GetInstance().ActiveLanguage )
+            {
+                case Languages.NL:
+                    ImageField.sprite = data.Image_NL;                    
+                    break;
+                
+                default:
+                    ImageField.sprite = data.Image;
+                    break;
+            }
+            
             ImageField.preserveAspect = true;
         }
 

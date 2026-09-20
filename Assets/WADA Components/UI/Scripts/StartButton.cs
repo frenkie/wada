@@ -6,7 +6,7 @@ namespace Wada
 {
     public class StartButton : MonoBehaviour
     {
-        public FadeIntroPhotogrammetry Title;
+        public FadeIntroPhotogrammetry[] Title;
         public FadeIntroPhotogrammetry Krebs;
         public SoundEffect KrebsSound;
         public double JumpTime;
@@ -34,7 +34,13 @@ namespace Wada
 
         public void OnAnimationFade()
         {
-            Title.FadeOut();
+            foreach (FadeIntroPhotogrammetry title in Title)
+            {
+                if (title.gameObject.activeSelf)
+                {
+                    title.FadeOut();
+                }
+            }
             Krebs.FadeOut();
             Invoke( "OnAnimationEnd", .3f );
         }

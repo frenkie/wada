@@ -60,6 +60,8 @@ namespace Wada
 
         public void FadeOut()
         {
+            if (! gameObject.activeInHierarchy) return;
+            
             Hashtable valueTo = new();
 
             valueTo.Add( "from", 1 );

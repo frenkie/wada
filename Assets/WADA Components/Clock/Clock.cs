@@ -22,14 +22,16 @@ namespace Wada
 
         const float BONUS_TIME_IN_SECONDS = 60f;
         const float BONUS_DECAY_IN_SECONDS = 60f;
-
+        
         float decaySpeed = 1f;
 
         float bonusDecayTimer = 0f;
-
+        
         float elapsedTime;
         int timeInSeconds = 0;
 
+        float finalTime;
+        
         float normalTime;
         float bonusTime;
         float bonusTimeAdded;
@@ -73,6 +75,15 @@ namespace Wada
         public void Countdown()
         {
             ResetTimes();
+            
+            finalTime = FinalTime;
+            switch( GameEngine.GetInstance().ActiveLanguage )
+            {
+                case Languages.NL:
+                    finalTime += 4;
+                    break;
+            }            
+            
             countingDown = true;
         }
 
@@ -222,7 +233,7 @@ namespace Wada
                     DecayBonusTime();
                 }
 
-                if ( !goingIntoFinalTime && GetCurrentTotalTime() <= FinalTime )
+                if ( !goingIntoFinalTime && GetCurrentTotalTime() <= finalTime )
                 {
                     goingIntoFinalTime = true;
                     allowBonusTime = false; // bonus doesn't count anymore, you're dead anyways

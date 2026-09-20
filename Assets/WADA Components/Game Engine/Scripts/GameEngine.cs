@@ -12,11 +12,14 @@ namespace Wada
 {
     public class GameEngine : MonoBehaviour
     {
+        public static event Action<Languages> OnLanguageSwitch = delegate(Languages newLanguage) { };
         public PlayableDirector Timeliner;
         public Guide[] Guides;
         public Transform GuideFlockPoint;
         public Transform GuideFirstWayPoint;
 
+        public Languages ActiveLanguage = Languages.EN;
+        
         public GameObject[] TestMontageTargets;
 
         public SkyboxAdjuster SkyboxAdjust;
@@ -54,8 +57,10 @@ namespace Wada
 
         [Header( "Instructions That Wait For External Action" )]
         public AbstractInstruction ChooseGuide;
+        public AbstractInstruction ChooseGuide_NL;
 
         public InstructionsController TouchItInstructions;
+        public InstructionsController TouchItInstructions_NL;
 
 
         static GameEngine instance;
@@ -566,6 +571,10 @@ namespace Wada
             {
                 ChooseGuide.FadeOut();
             }
+            if ( ChooseGuide_NL != null && ChooseGuide_NL.gameObject.activeInHierarchy )
+            {
+                ChooseGuide_NL.FadeOut();
+            }
         }
 
         public void ShowGuides()
@@ -586,6 +595,12 @@ namespace Wada
                     //guide.ShowVisually();
                 }
             }
+        }
+
+        public void SwitchLanguage(Languages newLanguage)
+        {
+            ActiveLanguage = newLanguage;
+            OnLanguageSwitch?.Invoke( newLanguage );
         }
 
         public void StartGuidedJourney()
